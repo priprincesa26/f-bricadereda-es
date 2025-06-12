@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fábrica de redações da LaLa</title>
+    <!-- Fonts e Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@600&family=Oswald:wght@500&family=Poppins:wght@400;500;600&family=Fira+Code&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <!-- Matter.js via CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #D23369; /* Rosa principal */
+            --secondary-color: #FFEFF2; /* Rosa bem claro (fundo) */
+            --accent-color: #FF7EB9; /* Rosa de destaque / claro */
+            --text-color: #4A4A4A;
+            --paper-bg: #FFFFFF;
+            --line-color: #E8E8E8;
+            --drawn-text-color: #D0021B; /* Vermelho que combina com rosa */
+            --placeholder-bg: #FFF5F8; /* Rosa muito claro para placeholder */
+            --placeholder-text: #b32a5a; /* Tom de rosa escuro para texto */
+            --sidebar-width: 280px;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { height: 100%; }
+        body { font-family: 'Poppins', sans-serif; color: var(--text-color); background-color: var(--secondary-color); overflow: hidden; }
+        .site-wrapper { display: flex; height: 100vh; }
+        .sidebar { flex: 0 0 var(--sidebar-width); background-color: var(--primary-color); color: white; padding: 2rem 1.5rem; display: flex; flex-direction: column; overflow-y: auto; }
+        .sidebar .logo { text-align: center; margin-bottom: 3rem; display: flex; justify-content: center; align-items: center; }
+        
+        .logo-text-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        /* *** ALTERAÇÃO AQUI: Cor para branco e remoção do fundo *** */
+        .logo-line-1 {
+            font-family: 'Oswald', sans-serif;
+            font-weight: 500;
+            text-transform: uppercase;
+            color: white; 
+            font-size: 1.3rem;
+            letter-spacing: 1.5px;
+            margin-bottom: 0.5rem;
+        }
+        .logo-line-2 {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+        .logo-lala {
+            font-family: 'Lora', serif;
+            font-weight: 600;
+            color: var(--accent-color);
+            font-size: 2.3rem;
+            line-height: 1;
+        }
+        .logo-heart {
+            color: var(--accent-color);
+            font-size: 1.6rem;
+            transform: translateY(2px);
+        }
+        
+        .sidebar nav { flex-grow: 1; }
+        .sidebar nav ul { list-style: none; }
+        .sidebar nav a { display: flex; align-items: center; color: #FFF0F5; text-decoration: none; padding: 0.85rem 1rem; margin-bottom: 0.5rem; border-radius: 8px; transition: all 0.2s ease-in-out; font-weight: 500; cursor: pointer; }
+        .sidebar nav a i { margin-right: 1rem; width: 20px; text-align: center; }
+        .sidebar nav a:hover { background-color: rgba(255, 255, 255, 0.1); color: white; }
+        .sidebar nav a.active { background-color: var(--accent-color); color: #6A0032; font-weight: 600; }
+        .sidebar-footer { text-align: center; font-size: 0.8rem; opacity: 0.7; padding-top: 1rem; }
+        .main-content { flex: 1; overflow-y: auto; position: relative; }
+        .page-content { display: none; height: auto; padding: 2rem; }
+        .page-content.active { display: block; }
+        
+        /* ===== ESTILOS RESTAURADOS DA PÁGINA DE REDAÇÃO ===== */
+        .main-container { width: 100%; max-width: 900px; margin: 0 auto; }
+        .toolbar { display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+        .tool-btn { padding: 0.75rem 1.5rem; border: none; border-radius: 8px; cursor: pointer; transition: all 0.2s ease-in-out; font-size: 1rem; font-weight: 500; display: flex; align-items: center; gap: 0.5rem; color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .tool-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.15); }
+        .draw-btn { background-color: var(--primary-color); }
+        .reset-btn { background-color: #F5A623; }
+        .theme-input-container { display: flex; align-items: center; flex-grow: 1; background-color: var(--paper-bg); border-radius: 8px; padding: 0.75rem 1rem; box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: all 0.2s ease-in-out; }
+        .theme-input-container:focus-within { box-shadow: 0 6px 15px rgba(210, 51, 105, 0.25); transform: translateY(-1px); }
+        .theme-input-container i { color: var(--primary-color); font-size: 1.1rem; margin-right: 0.75rem; }
+        .theme-input-container input { border: none; outline: none; background: transparent; width: 100%; font-family: 'Poppins', sans-serif; font-size: 1rem; color: var(--text-color); }
+        .ruled-paper { background-color: var(--paper-bg); box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08); border-radius: 12px; padding: 3rem 3rem 3rem 5rem; position: relative; min-height: 1000px; background-image: repeating-linear-gradient(to bottom, transparent, transparent 27px, var(--line-color) 27px, var(--line-color) 28px); line-height: 28px; }
+        .margin-line { position: absolute; left: 3rem; top: 2rem; bottom: 2rem; width: 1px; background: #ffcdd2; }
+        .editable-area { outline: none; font-size: 16px; font-family: 'Fira Code', monospace; }
+        .editable-area p { margin-bottom: 28px; }
+        .drawable { background-color: var(--accent-color); color: #6A0032; padding: 2px 8px; border-radius: 5px; cursor: pointer; transition: all 0.3s; font-weight: 600; display: inline-block; }
+        .drawable:hover { background-color: #f768ac; }
+        .insert-area, .drawn-content { outline: none; }
+        .insert-area { background-color: var(--placeholder-bg); color: var(--placeholder-text); padding: 2px 6px; border-radius: 4px; border-bottom: 2px dashed var(--primary-color); }
+        .drawn-text { color: var(--primary-color); font-weight: 500; }
+        .parentheses { color: var(--drawn-text-color); font-weight: 600; }
+        .redraw-btn { background: none; border: none; color: var(--accent-color); cursor: pointer; font-size: 1rem; padding: 0 0.5rem; opacity: 0.4; transition: all 0.2s; display: inline-flex; vertical-align: middle; }
+        .redraw-btn:hover { opacity: 1; transform: scale(1.2) rotate(15deg); }
+        .typing-cursor { display: inline-block; width: 8px; height: 1.2em; background-color: var(--text-color); animation: blink 0.7s infinite; margin-left: 2px; vertical-align: middle; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+        /* ESTILOS DA PÁGINA DE TEMAS (BOLAS) */
+        #temas-page { overflow: hidden; padding: 0; height: 100%;}
+        #world-container { width: 100%; height: 100%; position: relative; background: linear-gradient(135deg, #fff0f5 0%, #ffe6ef 100%); }
+        .ui-controls { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); z-index: 10; }
+        .ui-controls button { padding: 12px 28px; background: linear-gradient(135deg, #ffeff2, #ffdde1); color: #d23369; border: none; border-radius: 25px; font-size: 0.95em; font-weight: 600; cursor: pointer; box-shadow: 0 3px 8px rgba(220, 150, 170, 0.15); transition: all 0.3s ease; }
+        .ui-controls button:hover { background: linear-gradient(135deg, #ffdde1, #ffcad4); transform: translateY(-2px); box-shadow: 0 5px 12px rgba(210, 51, 105, 0.25); }
+        .theme-ball-render { position: absolute; border-radius: 50%; display: flex; align-items: center; justify-content: center; text-align: center; font-weight: bold; color: white; font-size: 10px; padding: 5px; cursor: grab; user-select: none; text-shadow: 0 0 3px rgba(0,0,0,0.5); box-shadow: inset 0 -3px 5px rgba(0,0,0,0.2), 0 2px 4px rgba(0,0,0,0.2); border: 2px solid rgba(255,255,255,0.5); }
+        .theme-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); display: none; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(5px); }
+        .theme-modal-content { background: white; padding: 40px; border-radius: 20px; max-width: 600px; width: 90%; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.3); position: relative; transform: scale(0.7); opacity: 0; transition: transform 0.3s ease-out, opacity 0.3s ease-out; }
+        .theme-modal-overlay.visible .theme-modal-content { transform: scale(1); opacity: 1; }
+        .theme-modal-content h3 { font-family: 'Poppins', sans-serif; font-size: 1.8em; color: var(--primary-color); margin-bottom: 20px; }
+        .theme-modal-close-btn { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 1.8em; color: #aaa; cursor: pointer; }
+        
+        /* ESTILOS DA PÁGINA DE ÓRGÃOS E LINKS */
+        .content-box { background-color: var(--paper-bg); padding: 2.5rem; border-radius: 12px; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08); }
+        .data-table { width: 100%; border-collapse: collapse; margin-top: 1.5rem; font-size: 0.9rem; }
+        .data-table th, .data-table td { border: 1px solid #ddd; padding: 12px; text-align: left; vertical-align: top; }
+        .data-table th { background-color: var(--secondary-color); font-weight: 600; color: var(--primary-color); }
+        
+        .links-page-wrapper { display: flex; align-items: flex-start; gap: 2.5rem; margin-top: 2rem; flex-wrap: wrap; }
+        .links-container { display: grid; grid-template-columns: 1fr; gap: 2rem; flex: 1; min-width: 320px;}
+        .link-card { background-color: var(--secondary-color); padding: 2.5rem; border-radius: 20px; text-decoration: none; color: var(--text-color); display: flex; align-items: center; gap: 2rem; transition: transform 0.2s ease-out, box-shadow 0.2s ease-out; border: 1px solid #ffe0ea; }
+        .link-card:hover { transform: translateY(-8px); box-shadow: 0 12px 25px rgba(210, 51, 105, 0.2); }
+        .link-card-icon { font-size: 3.5rem; color: var(--primary-color); flex-shrink: 0; text-align: center; width: 55px; }
+        .link-card-text { display: flex; flex-direction: column; }
+        .link-card-text strong { font-size: 1.4rem; font-weight: 600; margin-bottom: 0.35rem; }
+        .link-card-text span { font-size: 0.95rem; color: #667; word-break: break-all; }
+        
+        .links-photo-container { flex: 0 0 520px; }
+        .links-photo-container img { width: 100%; height: auto; border-radius: 20px; box-shadow: 0 15px 40px rgba(0,0,0,0.15); }
+
+        /* RESPONSIVIDADE */
+        @media (max-width: 1200px) {
+            .links-page-wrapper { justify-content: center; }
+            .links-photo-container { flex: 0 0 450px; }
+        }
+        @media (max-width: 992px) { 
+            body { overflow: auto; }
+            .site-wrapper { flex-direction: column; height: auto; } 
+            .sidebar, .main-content { overflow-y: visible; }
+            .main-content, .page-content { padding: 1.5rem; } 
+        }
+    </style>
+</head>
+<body>
+    <div class="site-wrapper">
+        <aside class="sidebar">
+            <div class="logo">
+                <div class="logo-text-container">
+                    <span class="logo-line-1">A FÁBRICA DE REDAÇÕES</span>
+                    <div class="logo-line-2">
+                        <span class="logo-lala">da LaLa</span>
+                        <i class="fas fa-heart logo-heart"></i>
+                    </div>
+                </div>
+            </div>
+            <nav>
+                <ul>
+                    <li><a onclick="showPage('redacao-page', this)" class="active"><i class="fas fa-pen-nib"></i><span>Redação</span></a></li>
+                    <li><a onclick="showPage('temas-page', this)"><i class="fas fa-lightbulb"></i><span>Temas</span></a></li>
+                    <li><a onclick="showPage('orgaos-page', this)"><i class="fas fa-landmark"></i><span>Órgãos</span></a></li>
+                    <li><a onclick="showPage('links-page', this)"><i class="fas fa-link"></i><span>Links</span></a></li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer"><p>Projeto desenvolvido por Priscila "LaLa"</p></div>
+        </aside>
+        
+        <main class="main-content">
+            <div id="redacao-page" class="page-content active">
+                 <div class="main-container">
+                    <div class="toolbar">
+                        <button class="tool-btn draw-btn" onclick="drawAll()"><i class="fas fa-random"></i><span>Sortear Tudo</span></button>
+                        <button class="tool-btn reset-btn" onclick="resetEssay()"><i class="fas fa-undo"></i><span>Reiniciar</span></button>
+                        <div class="theme-input-container">
+                            <i class="fas fa-pencil-alt"></i>
+                            <input type="text" id="essayTheme" placeholder="Digite o tema da redação aqui...">
+                        </div>
+                    </div>
+                    <div class="paper-container">
+                        <div class="ruled-paper">
+                            <div class="margin-line"></div>
+                            <div class="editable-area" id="essayContent">
+                                <p><span class="insert-area" contenteditable="true">[INSIRA AQUI SEU REPERTÓRIO]</span>. <span class="insert-area" contenteditable="true">[INSIRA AQUI SUA APRESENTAÇÃO DO TEMA]</span>. <span class="drawable" data-group="2" onclick="drawFromGroup(this)">SORTEAR 2</span></p>
+                                <p><span class="drawable" data-group="3" data-position="1" onclick="drawFromGroup(this)">SORTEAR 3</span> <span class="drawable" data-group="4" onclick="drawFromGroup(this)">SORTEAR 4</span> <span class="drawable" data-group="6" onclick="drawFromGroup(this)">SORTEAR 6</span> <span class="insert-area" contenteditable="true">[INSIRA AQUI SEU REPERTÓRIO]</span>. <span class="drawable" data-group="6" onclick="drawFromGroup(this)">SORTEAR 6</span> <span class="insert-area" contenteditable="true">[INSIRA AQUI SUA ARGUMENTAÇÃO]</span>. <span class="drawable" data-group="8" onclick="drawFromGroup(this)">SORTEAR 8</span></p>
+                                <p><span class="drawable" data-group="3" data-position="2" onclick="drawFromGroup(this)">SORTEAR 3</span> <span class="drawable" data-group="4" onclick="drawFromGroup(this)">SORTEAR 4</span> <span class="drawable" data-group="6" onclick="drawFromGroup(this)">SORTEAR 6</span> <span class="insert-area" contenteditable="true">[INSIRA AQUI SEU REPERTÓRIO]</span>. <span class="drawable" data-group="6" onclick="drawFromGroup(this)">SORTEAR 6</span> <span class="insert-area" contenteditable="true">[INSIRA AQUI SUA ARGUMENTAÇÃO]</span>. <span class="drawable" data-group="8" onclick="drawFromGroup(this)">SORTEAR 8</span></p>
+                                <p><span class="drawable" data-group="7" onclick="drawFromGroup(this)">SORTEAR 7</span> <span class="drawable" data-group="9" onclick="drawFromGroup(this)">SORTEAR 9</span> <span class="drawable" data-group="10" onclick="drawFromGroup(this)">SORTEAR 10</span> <span class="drawable" data-group="7" onclick="drawFromGroup(this)">SORTEAR 7</span> <span class="insert-area" contenteditable="true">[INSIRA AQUI SUA RETOMADA DE REPERTÓRIO DA INTRODUÇÃO]</span>.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="temas-page" class="page-content">
+                <div id="world-container"></div>
+                <div class="ui-controls">
+                    <button id="remixThemesBtn">Bagunçar de Novo</button>
+                </div>
+                <div id="themeModal" class="theme-modal-overlay">
+                    <div class="theme-modal-content">
+                        <button id="modalCloseBtn" class="theme-modal-close-btn">×</button>
+                        <h3 id="modalThemeText"></h3>
+                    </div>
+                </div>
+            </div>
+            <div id="orgaos-page" class="page-content">
+                 <div class="content-box">
+                    <h1>Órgãos para Proposta de Intervenção</h1>
+                    <h2>GOVERNO FEDERAL</h2>
+                    <table class="data-table">
+                        <thead><tr><th>Órgão</th><th>Sigla</th><th>Jurisdição</th><th>Função detalhada</th></tr></thead>
+                        <tbody>
+                            <tr><td>Ministério da Saúde</td><td>MS</td><td>Federal (Presidente)</td><td>Coordena o SUS; formula políticas de saúde; combate doenças; distribui vacinas e insumos; gerencia emergências sanitárias; regula a vigilância sanitária.</td></tr>
+                            <tr><td>Ministério da Educação</td><td>MEC</td><td>Federal (Presidente)</td><td>Define diretrizes da educação nacional; gerencia o ENEM, ProUni, FIES; regula instituições; supervisiona o Fundeb e a BNCC.</td></tr>
+                            <tr><td>Ministério da Justiça e Segurança Pública</td><td>MJSP</td><td>Federal (Presidente)</td><td>Combate o crime e a corrupção; coordena a PF e PRF; regula segurança pública; atua com direitos constitucionais e imigração.</td></tr>
+                            <tr><td>Ministério da Mulher, da Família e dos Direitos Humanos</td><td>MMFDH</td><td>Federal (Presidente)</td><td>Formula políticas para mulheres, idosos, crianças, LGBTQIAPN+; combate violência e preconceito; gerencia canais como o Disque 100.</td></tr>
+                            <tr><td>Ministério do Meio Ambiente</td><td>MMA</td><td>Federal (Presidente)</td><td>Protege biomas; combate desmatamento e queimadas; regula áreas de conservação; promove educação ambiental e políticas climáticas.</td></tr>
+                            <tr><td>Congresso Nacional</td><td>—</td><td>Federal (Poder Legislativo autônomo)</td><td>Cria leis; fiscaliza o Executivo; aprova orçamento; representa população e estados; instaura CPIs.</td></tr>
+                            <tr><td>Supremo Tribunal Federal</td><td>STF</td><td>Federal (Poder Judiciário autônomo)</td><td>Garante cumprimento da Constituição; julga ações constitucionais e conflitos federativos.</td></tr>
+                            <tr><td>Defensoria Pública da União</td><td>DPU</td><td>Federal (autônomo)</td><td>Oferece assistência jurídica gratuita a quem não pode pagar; atua em causas federais e coletivas.</td></tr>
+                            <tr><td>IBGE</td><td>—</td><td>Federal (Presidência da República)</td><td>Produz estatísticas e censos; fornece dados para políticas públicas; analisa dados sociais, geográficos e econômicos.</td></tr>
+                            <tr><td>Fundação Nacional dos Povos Indígenas</td><td>FUNAI</td><td>Federal (Presidente)</td><td>Protege os direitos indígenas; demarca terras; combate invasões; promove educação bilíngue e saúde indígena.</td></tr>
+                        </tbody>
+                    </table>
+                    <h2>GOVERNO ESTADUAL</h2>
+                    <table class="data-table">
+                         <thead><tr><th>Órgão</th><th>Sigla</th><th>Jurisdição</th><th>Função detalhada</th></tr></thead>
+                        <tbody>
+                            <tr><td>Secretaria Estadual de Saúde</td><td>SES</td><td>Estadual (Governador)</td><td>Administra hospitais estaduais; combate epidemias; organiza campanhas de vacinação e prevenção; repassa verbas aos municípios.</td></tr>
+                            <tr><td>Secretaria Estadual de Educação</td><td>SEE</td><td>Estadual (Governador)</td><td>Administra escolas estaduais; promove capacitação docente; define currículos; amplia ensino técnico.</td></tr>
+                            <tr><td>Polícia Militar</td><td>PM</td><td>Estadual (Governador)</td><td>Realiza policiamento ostensivo; atua na prevenção de crimes; mantém a ordem pública.</td></tr>
+                            <tr><td>Polícia Civil</td><td>PC</td><td>Estadual (Governador)</td><td>Investiga crimes; conduz inquéritos; realiza perícias; trabalha com a Polícia Científica.</td></tr>
+                            <tr><td>Ministério Público Estadual</td><td>MPE</td><td>Estadual (autônomo)</td><td>Fiscaliza o cumprimento das leis; atua em defesa do consumidor, meio ambiente, infância; pode processar agentes públicos.</td></tr>
+                            <tr><td>Defensoria Pública Estadual</td><td>DPE</td><td>Estadual (autônomo)</td><td>Oferece defesa jurídica gratuita em ações estaduais; atua em casos de saúde, família, moradia e violência doméstica.</td></tr>
+                        </tbody>
+                    </table>
+                    <h2>GOVERNO MUNICIPAL</h2>
+                    <table class="data-table">
+                        <thead><tr><th>Órgão</th><th>Sigla</th><th>Jurisdição</th><th>Função detalhada</th></tr></thead>
+                        <tbody>
+                            <tr><td>Prefeitura</td><td>—</td><td>Municipal (Prefeito)</td><td>Executa políticas locais de saúde, educação, mobilidade e urbanismo; administra infraestrutura, coleta de lixo, transporte.</td></tr>
+                            <tr><td>Secretaria Municipal de Educação</td><td>SME</td><td>Municipal (Prefeito)</td><td>Gerencia creches e escolas de ensino infantil e fundamental; promove alfabetização e inclusão educacional.</td></tr>
+                            <tr><td>Secretaria Municipal de Saúde</td><td>SMS</td><td>Municipal (Prefeito)</td><td>Coordena postos de saúde (UBS); realiza vacinação; atua na saúde da família e prevenção de doenças.</td></tr>
+                            <tr><td>Câmara de Vereadores</td><td>—</td><td>Municipal (Poder Legislativo autônomo)</td><td>Cria leis municipais; fiscaliza o prefeito; discute orçamento e políticas públicas locais.</td></tr>
+                            <tr><td>Conselho Tutelar</td><td>—</td><td>Municipal (autônomo)</td><td>Garante os direitos das crianças e adolescentes; atua em casos de negligência, abuso, evasão escolar; articula com saúde e justiça.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div id="links-page" class="page-content">
+                <div class="content-box">
+                    <h1>Links Úteis</h1>
+                    <div class="links-page-wrapper">
+                        <div class="links-container">
+                            <a href="https://x.com/studies_lala" target="_blank" rel="noopener noreferrer" class="link-card">
+                                <div class="link-card-icon"><i class="fab fa-twitter"></i></div>
+                                <div class="link-card-text">
+                                    <strong>Perfil da Criadora</strong>
+                                    <span>x.com/studies_lala</span>
+                                </div>
+                            </a>
+                            <a href="https://priprincesa26.github.io/studies_lala/" target="_blank" rel="noopener noreferrer" class="link-card">
+                                <div class="link-card-icon"><i class="fas fa-save"></i></div>
+                                <div class="link-card-text">
+                                    <strong>Site para Salvar Redações</strong>
+                                    <span>priprincesa26.github.io/studies_lala</span>
+                                </div>
+                            </a>
+                            <a href="https://www.lucasfelpi.com.br/redamil" target="_blank" rel="noopener noreferrer" class="link-card">
+                                <div class="link-card-icon"><i class="fas fa-book-open"></i></div>
+                                <div class="link-card-text">
+                                    <strong>Cartilhas do Lucas Felpi</strong>
+                                    <span>www.lucasfelpi.com.br/redamil</span>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="links-photo-container">
+                            <img src="fotolinks.jpg" alt="Foto da Priscila 'LaLa'">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // LÓGICA DE NAVEGAÇÃO
+        let isThemesPageInitialized = false;
+        function showPage(pageId, clickedLink) {
+            document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.sidebar nav a').forEach(a => a.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            clickedLink.classList.add('active');
+            if (pageId === 'temas-page' && !isThemesPageInitialized) {
+                initThemesPage();
+                isThemesPageInitialized = true;
+            }
+        }
+        
+        // LÓGICA DO GERADOR DE REDAÇÃO
+        const originalEssayHTML = document.getElementById('essayContent').innerHTML;
+        const groups = { 2:[ "Diante disso, nota-se a formação de um problema complexo, que se fundamenta na (Tese 1) e na (Tese 2).","Com isso, surge uma questão preocupante, em razão da (Tese 1) e da (Tese 2).","Nessa perspectiva, identifica-se uma situação delicada, cujas causas estão na (Tese 1) e na (Tese 2).","Portanto, é necessário estabelecer medidas que atuem nas raízes do problema: a (Tese 1) e a (Tese 2).","Nesse cenário, observa-se o agravamento de uma séria problemática, motivada pela (Tese 1) e pela (Tese 2).","Sob tal ótica, torna-se essencial intervir na questão, cuja estrutura repousa sobre a (Tese 1) e a (Tese 2).","Assim, compreende-se que o problema persiste não só por conta da (Tese 1), como também da (Tese 2).","É possível constatar a existência de um desafio social multifacetado, sustentado pela (Tese 1) e pela (Tese 2).","Desse modo, a problemática revela-se fruto direto da (Tese 1), somada à persistência da (Tese 2).","Logo, a situação atual configura-se como resultado da combinação entre a (Tese 1) e a (Tese 2).","Portanto, a manutenção do problema decorre da presença simultânea da (Tese 1) e da (Tese 2), que se retroalimentam.","Nessa conjuntura, torna-se evidente que tanto a (Tese 1) quanto a (Tese 2) desempenham papel central na perpetuação do impasse.","O cenário preocupante, então, emerge da negligência frente à (Tese 1), associada à influência da (Tese 2).","A interação entre a (Tese 1) e a (Tese 2) cria um ciclo vicioso que reforça a permanência da questão na sociedade contemporânea.","Diante disso, percebe-se a recorrência de uma questão alarmante, cuja gênese está associada à (Tese 1) e à (Tese 2).","Nesse panorama, compreende-se que a problemática decorre tanto da (Tese 1) quanto da (Tese 2), que agem de forma conjunta.","Assim, torna-se nítido que a questão está enraizada na (Tese 1), bem como na (Tese 2), o que compromete sua superação.","A análise do contexto atual revela que a (Tese 1) e a (Tese 2) constituem pilares da manutenção do impasse.","A permanência da problemática está, pois, atrelada à (Tese 1), ao mesmo tempo em que a (Tese 2) contribui para sua intensificação.","Constata-se, então, que o cenário problemático se sustenta sobre dois grandes eixos: a (Tese 1) e a (Tese 2).","É inegável que a (Tese 1) e a (Tese 2) exercem influência decisiva sobre o prolongamento do problema em questão.","A (Tese 1), somada à (Tese 2), compõe o cerne da dificuldade enfrentada, exigindo atenção e intervenção imediata." ],3:[ "Em primeira análise, + Ademais,","Dado o exposto, + Além disso,","Nesse sentido, + Ademais,","De início, + Além disso,","Sob esse viés, + Outrossim,","Acerca dessa lógica, + Além disso,","Em primeira perspectiva, + Ademais,","Em primeiro plano, + Além disso,","Sob essa perspectiva, + Outrossim,","Diante desse cenário, + Somado a isso," ],4:[ "compreende-se que (...) é determinante para que a problemática perdure.","é crucial que a escassez de debates acerca (...) seja superada.","é vital denunciar a postura inerte do Estado brasileiro, que contribui para a manutenção (...).","importa frisar que (...) é um fator relevante na análise da questão.","não se pode ignorar que (...) exerce papel significativo na dinâmica do problema.","é relevante observar que (...) tem papel estruturante na conjuntura atual.","convém ressaltar que (...), uma vez que esse fator contribui significativamente para a permanência do problema.","pode-se considerar que (...), visto que esse elemento interfere diretamente na estrutura da questão analisada.","é notório que (...), o que reforça a necessidade de ações mais efetivas frente à problemática.","convém ressaltar que (...) colabora para a continuidade do problema.","pode considerar-se que (...) influencia diretamente na questão.","é notório que (...) dificulta a superação da problemática.","percebe-se que (...) reforça a permanência do impasse.","é válido ressaltar que (...) impacta negativamente o cenário atual.","é válido destacar que (...) contribui para o agravamento do quadro.","evidencia-se que (...) está presente na raiz do problema.","é perceptível que (...) interfere na dinâmica da situação.","deve-se observar que (...) atua como obstáculo à resolução.","é imperativo pontuar que (...) mantém o problema em evidência.","é necessário entender que (...) está ligado à persistência do cenário.","é imprescindível ressaltar que (...) alimenta a continuidade da questão." ],6:[ "Nesse contexto,","Nessa conjuntura,","Sob essa perspectiva,","Nessa lógica,","Com efeito,","Nesse viés,","A partir desse contexto,","Nesse sentido,","Sob essa óptica,","Diante desse cenário,","Tendo isso em vista,","À vista disso,","Considerando esse panorama,","Sob tal perspectiva,","À luz desse contexto,","Frente a essa realidade,","No cenário apresentado,","Sob essa lógica,","Tendo isso em mente," ],7:[ "Desse modo,","Logo,","Portanto,","Dessa maneira,","Dessa forma,","Assim,","Diante dos fatos supracitados,","Dessarte,","Ante o exposto,","Por conseguinte,","Posto isso,","Tendo em vista o exposto,","Destarte," ],8:[ "Dessa forma, para transfigurar o problema, nota-se a necessidade de descortinar a questão.","Então, essa nebulosidade precisa ser exposta para conscientizar a sociedade.","Assim, é imperioso que as autoridades se mobilizem para mitigar essa mazela social.","Dessa maneira, torna-se urgente romper com a passividade diante da questão.","Assim, faz-se necessário lançar luz sobre o tema e promover mudanças efetivas.","Logo, é essencial que o debate seja ampliado e levado à esfera pública.","Portanto, é preciso enfrentar o problema com ações concretas e sensíveis.","Por isso, urge que a sociedade e o Estado unam esforços para reverter esse quadro.","Em vista disso, é fundamental desconstruir a indiferença e fomentar a transformação.","Diante disso, é inadiável a formulação de medidas que combatam esse impasse.","Diante disso, é essencial romper com a inércia frente ao problema.","Dessa maneira, impõe-se a urgência de ações que revertam esse cenário.","Diante do exposto, é urgente fomentar medidas que mitiguem essa realidade.","Por isso, é necessário romper com a negligência histórica sobre o tema." ],9:[ "faz-se necessário que meios sejam criados para intervir nesse óbice.","medidas são necessárias para combater esse cenário social.","não se deve hesitar: são necessárias medidas para a erradicação da problemática.","é necessária uma intervenção pontual.","urgem medidas que mitiguem a problemática.","torna-se primordial mitigar (...).","fica evidente a necessidade de estratégias para atenuar a problemática.","é indispensável a formulação de ações eficazes frente ao problema.","torna-se essencial promover soluções que revertam esse quadro.","demanda-se a implementação de políticas que solucionem a questão.","é imperativo o desenvolvimento de estratégias que enfrentem o cenário atual.","mostra-se necessária a articulação entre diferentes setores para lidar com o desafio.","torna-se necessária a elaboração de políticas voltadas ao enfrentamento da questão.","é fundamental promover políticas inclusivas para reverter o quadro.","é necessário fomentar práticas que auxiliem na superação da questão." ],10:[ "Cabe, portanto, ao (órgão) – (detalhamento) – a realização de (ação), através de (meio), com o intuito de (finalidade). Paralelamente, é dever do (órgão) – (detalhamento) – a (ação), por meio de (meio), a fim de (finalidade).","Compete ao (órgão) – (detalhamento) – implementar (ação), por meio de (meio), com o objetivo de (finalidade). Além disso, é papel do (órgão) – (detalhamento) – promover (ação), através de (meio), com vistas a (finalidade).","É papel do (órgão) – (detalhamento) – investir em (ação), por meio de (meio), com o propósito de (finalidade). Juntamente a isso, cabe ao (órgão) – (detalhamento) – estimular (ação), através de (meio), a fim de (finalidade).","Torna-se responsabilidade do (órgão) – (detalhamento) – assegurar (ação), por meio de (meio), com a finalidade de (finalidade). Em paralelo, o (órgão) – (detalhamento) – deve promover (ação), através de (meio), com o intuito de (finalidade).","É necessário que o (órgão) – (detalhamento) – desenvolva (ação), através de (meio), com vistas à (finalidade). Ao mesmo tempo, cabe ao (órgão) – (detalhamento) – garantir (ação), por meio de (meio), a fim de (finalidade).","Incumbe ao (órgão) – (detalhamento) – realizar (ação), por intermédio de (meio), com o intuito de (finalidade). De forma complementar, é necessário que o (órgão) – (detalhamento) – fomente (ação), através de (meio), com o objetivo de (finalidade).","É função do (órgão) – (detalhamento) – executar (ação), através de (meio), visando a (finalidade). Simultaneamente, cabe ao (órgão) – (detalhamento) – viabilizar (ação), por meio de (meio), com vistas a (finalidade).","É imperativo que o (órgão) – (detalhamento) – viabilize (ação), através de (meio), a fim de (finalidade). Para isso, o (órgão) – (detalhamento) – deve aplicar (ação), por meio de (meio), com o propósito de (finalidade).","Deve-se, portanto, atribuir ao (órgão) – (detalhamento) – a incumbência de (ação), por meio de (meio), com o objetivo de (finalidade). De modo conjunto, o (órgão) – (detalhamento) – deve assegurar (ação), através de (meio), com o intuito de (finalidade).","Torna-se necessário que o (órgão) – (detalhamento) – desenvolva (ação), por meio de (meio), com o objetivo de (finalidade). Em acréscimo, o (órgão) – (detalhamento) – precisa executar (ação), através de (meio), visando a (finalidade).","Torna-se imprescindível que o (órgão) – (detalhamento) – atue por meio de (ação), através de (meio), com o fim de (finalidade). Ainda, o (órgão) – (detalhamento) – deve realizar (ação), por meio de (meio), a fim de (finalidade).","É responsabilidade do (órgão) – (detalhamento) – elaborar (ação), por meio de (meio), com o intuito de (finalidade). Além disso, cabe ao (órgão) – (detalhamento) – fomentar (ação), através de (meio), com o objetivo de (finalidade).","Cabe ao (órgão) – (detalhamento) – instituir (ação), por meio de (meio), com vistas à (finalidade). Complementarmente, o (órgão) – (detalhamento) – deve apoiar (ação), por intermédio de (meio), a fim de (finalidade).","É fundamental que o (órgão) – (detalhamento) – incentive (ação), por meio de (meio), com o objetivo de (finalidade). Ao mesmo tempo, é necessário que o (órgão) – (detalhamento) – proporcione (ação), através de (meio), com vistas a (finalidade).","Cumpre ao (órgão) – (detalhamento) – promover (ação), recorrendo a (meio), no sentido de (finalidade). Em contrapartida, é vital que o (órgão) – (detalhamento) – desenvolva (ação), mediante (meio), com a perspectiva de (finalidade).","É da alçada do (órgão) – (detalhamento) – instituir (ação), através de (meio), objetivando (finalidade). Em acréscimo, é pertinente que o (órgão) – (detalhamento) – estimule (ação), por via de (meio), para fins de (finalidade)." ]};
+        const drawnElements = {};
+        function processDrawnText(t){let e=t.replace(/\(([^)]+)\)/g,'<span class="parentheses">($1)</span>');return e=e.replace(/– ([^–]+) –/g,' <span class="parentheses">– $1 –</span> '),`<span class="drawn-text">${e}</span>`}function typeWriter(t,e,n=25){return new Promise(o=>{t.innerHTML="";let l=0;const s='<span class="typing-cursor"></span>';t.innerHTML=s;const i=setInterval(()=>{l<e.length?(t.innerHTML=e.substring(0,l+1)+s,l++):(clearInterval(i),t.innerHTML=e,o())},n)})}function addRedrawButton(t){t.nextSibling&&t.nextSibling.classList&&t.nextSibling.classList.contains("redraw-btn")&&t.nextSibling.remove();const e=document.createElement("button");e.className="redraw-btn",e.innerHTML='<i class="fas fa-dice-d6"></i>',e.title="Sortear novamente",e.onclick=()=>redrawSingleItem(t),t.parentNode.insertBefore(e,t.nextSibling)}async function drawFromGroup(t){if(!t.classList.contains("drawable")&&!t.classList.contains("drawn-content"))return;const e=t.getAttribute("data-group"),n=t.getAttribute("data-position");if(t.onclick=null,t.className="drawn-content",t.contentEditable=!0,"3"===e){drawnElements["3"]||(randomIndex=Math.floor(Math.random()*groups[3].length),drawnElements["3"]=groups[3][randomIndex].split(" + ")),textToDraw=drawnElements["3"]["1"===n?0:1],await typeWriter(t,processDrawnText(textToDraw))}else{drawnElements[e]||(drawnElements[e]=[]);let o=groups[e].filter(t=>!drawnElements[e].includes(t));0===o.length&&(drawnElements[e]=[],o=groups[e]);const l=Math.floor(Math.random()*o.length),s=o[l];drawnElements[e].push(s),await typeWriter(t,processDrawnText(s))}addRedrawButton(t)}async function redrawSingleItem(t){const e=t.getAttribute("data-group");if("3"===e)return delete drawnElements["3"],void await Promise.all(Array.from(document.querySelectorAll('.drawn-content[data-group="3"]')).map(t=>drawFromGroup(t)));const n=t.querySelector(".drawn-text").textContent;let o=groups[e].filter(t=>t!==n);0===o.length&&(o=groups[e]);const l=Math.floor(Math.random()*o.length),s=o[l],i=drawnElements[e].indexOf(n);i>-1&&drawnElements[e].splice(i,1),drawnElements[e].push(s),await typeWriter(t,processDrawnText(s))}async function drawAll(){Object.keys(drawnElements).forEach(t=>delete drawnElements[t]);const t=document.querySelectorAll(".drawable");for(const e of t)await drawFromGroup(e)}function resetEssay(){confirm("Tem certeza que deseja reiniciar? Todo o progresso será perdido.")&&(document.getElementById("essayContent").innerHTML=originalEssayHTML,Object.keys(drawnElements).forEach(t=>delete drawnElements[t]))}
+
+        // LÓGICA DA PÁGINA DE TEMAS INTERATIVA
+        function initThemesPage() {
+            const Engine = Matter.Engine, World = Matter.World, Runner = Matter.Runner, Bodies = Matter.Bodies, Composite = Matter.Composite, Mouse = Matter.Mouse, MouseConstraint = Matter.MouseConstraint;
+            const worldContainer = document.getElementById('world-container'), remixThemesBtn = document.getElementById('remixThemesBtn'), themeModal = document.getElementById('themeModal'), modalThemeText = document.getElementById('modalThemeText'), modalCloseBtn = document.getElementById('modalCloseBtn');
+            let engine, world, runner, mouseConstraint;
+            const ballColors = ['#E91E63', '#EC407A', '#C2185B', '#AD1457', '#880E4F', '#FF4081', '#FF80AB', '#D23369', '#F06292', '#CE93D8', '#BA68C8', '#AB47BC', '#9C27B0', '#7B1FA2', '#D81B60', '#F48FB1'];
+            const sampleThemes = ["Desafios para a democratização da arte urbana","Caminhos para a valorização do idoso na sociedade brasileira","Caminhos para combater os maus-tratos aos animais no Brasil","O preconceito linguístico em questão no Brasil","Desafios para a popularização da vacinação no Brasil","Caminhos para o combate à homofobia no Brasil","Desafios da alimentação escolar no Brasil","Dificuldades enfrentadas para a doação de órgãos no Brasil","Caminhos para combater as fake news","A valorização dos indígenas no Brasil do século XXI","Desafios no combate à pedofilia virtual","Caminhos para promover a reciclagem nas cidades brasileiras","Desafios para o enfrentamento da crise hídrica e das queimadas no Brasil","Caminhos para combater o racismo ambiental no Brasil","Desafios para garantir os direitos dos povos tradicionais no Brasil","Caminhos para fortalecer a soberania digital no Brasil","Desafios da cibersegurança frente aos ataques digitais no Brasil","Caminhos para promover a inclusão digital nas periferias e zonas rurais do Brasil","Caminhos para combater o desperdício de alimentos e garantir segurança alimentar no Brasil","Desafios para o enfrentamento da desinformação e da polarização política no Brasil","Caminhos para integrar a inteligência artificial à educação no Brasil","Desafios no combate à violência política de gênero no ambiente digital brasileiro","Desafios para a recuperação da cobertura vacinal no Brasil pós-pandemia","Caminhos para prevenir a exploração sexual infantil no ambiente virtual brasileiro","Caminhos para garantir mobilidade urbana inclusiva e acessível no Brasil"];
+            
+            engine = Engine.create({ gravity: { y: 0.4 } });
+            world = engine.world;
+            runner = Runner.create();
+            const ground = Bodies.rectangle(worldContainer.clientWidth / 2, worldContainer.clientHeight + 30, worldContainer.clientWidth * 2, 60, { isStatic: true, render: { visible: false } });
+            const wallLeft = Bodies.rectangle(-30, worldContainer.clientHeight / 2, 60, worldContainer.clientHeight * 2, { isStatic: true, render: { visible: false } });
+            const wallRight = Bodies.rectangle(worldContainer.clientWidth + 30, worldContainer.clientHeight / 2, 60, worldContainer.clientHeight * 2, { isStatic: true, render: { visible: false } });
+            mouse = Mouse.create(worldContainer);
+            mouseConstraint = MouseConstraint.create(engine, { mouse: mouse, constraint: { stiffness: 0.1, render: { visible: false } } });
+            World.add(world, [ground, wallLeft, wallRight, mouseConstraint]);
+            Runner.run(runner, engine);
+            Matter.Events.on(engine, 'afterUpdate', updateBallElements);
+
+            function createThemeBall(text) {
+                const radius = Math.max(50, Math.min(85, text.length * 1.1 + 25));
+                const x = worldContainer.clientWidth / 2 + (Math.random() - 0.5) * 100;
+                const y = -30 - (Math.random() * 50);
+                const ballBody = Bodies.circle(x, y, radius, { restitution: 0.5, friction: 0.1, render: { visible: false } });
+                ballBody.isThemeBall = true;
+                const ballElement = document.createElement('div');
+                ballElement.className = 'theme-ball-render';
+                ballElement.id = `ball-${ballBody.id}`;
+                ballElement.style.width = `${radius * 2}px`;
+                ballElement.style.height = `${radius * 2}px`;
+                ballElement.style.backgroundColor = ballColors[Math.floor(Math.random() * ballColors.length)];
+                let shortText = text.split(' ')[0];
+                if (shortText.length > 10) shortText = shortText.substring(0, 8) + '...';
+                ballElement.textContent = shortText;
+                worldContainer.appendChild(ballElement);
+                let startX, startY, startTime;
+                ballElement.addEventListener('mousedown', (e) => { startX = e.clientX; startY = e.clientY; startTime = Date.now(); });
+                ballElement.addEventListener('mouseup', (e) => {
+                    const distance = Math.sqrt(Math.pow(e.clientX - startX, 2) + Math.pow(e.clientY - startY, 2));
+                    const duration = Date.now() - startTime;
+                    if (distance < 10 && duration < 200) {
+                        modalThemeText.textContent = text;
+                        themeModal.style.display = 'flex';
+                        setTimeout(() => themeModal.classList.add('visible'), 10);
+                        Runner.stop(runner);
+                    }
+                });
+                return ballBody;
+            }
+
+            function updateBallElements() {
+                Composite.allBodies(world).forEach(body => {
+                    if (body.isThemeBall) {
+                        const el = document.getElementById(`ball-${body.id}`);
+                        if (el) {
+                            el.style.left = `${body.position.x - body.circleRadius}px`;
+                            el.style.top = `${body.position.y - body.circleRadius}px`;
+                            el.style.transform = `rotate(${body.angle}rad)`;
+                        }
+                    }
+                });
+            }
+
+            function loadInitialThemes() {
+                sampleThemes.forEach(themeText => World.add(world, createThemeBall(themeText)));
+            }
+
+            remixThemesBtn.addEventListener('click', () => {
+                World.clear(world, true);
+                document.querySelectorAll('.theme-ball-render').forEach(el => el.remove());
+                World.add(world, [ground, wallLeft, wallRight, mouseConstraint]);
+                loadInitialThemes();
+            });
+
+            modalCloseBtn.addEventListener('click', () => {
+                themeModal.classList.remove('visible');
+                setTimeout(() => { themeModal.style.display = 'none'; Runner.start(runner, engine); }, 300);
+            });
+
+            loadInitialThemes();
+        }
+    </script>
+</body>
+</html>
