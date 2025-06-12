@@ -28,7 +28,7 @@
         html, body { height: 100%; }
         body { font-family: 'Poppins', sans-serif; color: var(--text-color); background-color: var(--secondary-color); overflow: hidden; }
         .site-wrapper { display: flex; height: 100vh; }
-        .sidebar { flex: 0 0 var(--sidebar-width); background-color: var(--primary-color); color: white; padding: 2rem 1.5rem; display: flex; flex-direction: column; overflow-y: auto; }
+        .sidebar { flex: 0 0 var(--sidebar-width); background-color: var(--primary-color); color: white; padding: 2rem 1.5rem; display: flex; flex-direction: column; overflow-y: auto; transition: all 0.3s ease; }
         .sidebar .logo { text-align: center; margin-bottom: 3rem; display: flex; justify-content: center; align-items: center; }
         
         .logo-text-container {
@@ -36,7 +36,6 @@
             flex-direction: column;
             align-items: center;
         }
-        /* *** ALTERAÇÃO AQUI: Cor para branco e remoção do fundo *** */
         .logo-line-1 {
             font-family: 'Oswald', sans-serif;
             font-weight: 500;
@@ -78,7 +77,7 @@
         /* ===== ESTILOS RESTAURADOS DA PÁGINA DE REDAÇÃO ===== */
         .main-container { width: 100%; max-width: 900px; margin: 0 auto; }
         .toolbar { display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
-        .tool-btn { padding: 0.75rem 1.5rem; border: none; border-radius: 8px; cursor: pointer; transition: all 0.2s ease-in-out; font-size: 1rem; font-weight: 500; display: flex; align-items: center; gap: 0.5rem; color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .tool-btn { padding: 0.75rem 1.5rem; border: none; border-radius: 8px; cursor: pointer; transition: all 0.2s ease-in-out; font-size: 1rem; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 0.5rem; color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         .tool-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.15); }
         .draw-btn { background-color: var(--primary-color); }
         .reset-btn { background-color: #F5A623; }
@@ -116,6 +115,8 @@
         
         /* ESTILOS DA PÁGINA DE ÓRGÃOS E LINKS */
         .content-box { background-color: var(--paper-bg); padding: 2.5rem; border-radius: 12px; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08); }
+        .content-box h1 { margin-bottom: 1rem; }
+        .content-box h2 { margin-top: 2rem; color: var(--primary-color); }
         .data-table { width: 100%; border-collapse: collapse; margin-top: 1.5rem; font-size: 0.9rem; }
         .data-table th, .data-table td { border: 1px solid #ddd; padding: 12px; text-align: left; vertical-align: top; }
         .data-table th { background-color: var(--secondary-color); font-weight: 600; color: var(--primary-color); }
@@ -132,7 +133,7 @@
         .links-photo-container { flex: 0 0 520px; }
         .links-photo-container img { width: 100%; height: auto; border-radius: 20px; box-shadow: 0 15px 40px rgba(0,0,0,0.15); }
 
-        /* RESPONSIVIDADE */
+        /* RESPONSIVIDADE - TABLET E ESTRUTURA INICIAL */
         @media (max-width: 1200px) {
             .links-page-wrapper { justify-content: center; }
             .links-photo-container { flex: 0 0 450px; }
@@ -140,8 +141,52 @@
         @media (max-width: 992px) { 
             body { overflow: auto; }
             .site-wrapper { flex-direction: column; height: auto; } 
-            .sidebar, .main-content { overflow-y: visible; }
-            .main-content, .page-content { padding: 1.5rem; } 
+            .sidebar { flex: 0 0 auto; --sidebar-width: 100%; border-radius: 0; }
+            .main-content, .page-content { overflow-y: visible; padding: 1.5rem; } 
+            #temas-page { height: 80vh; }
+        }
+
+        /* ===== ESTILOS DE RESPONSIVIDADE PARA CELULAR ===== */
+        @media (max-width: 768px) {
+            .main-content, .page-content { padding: 1rem; }
+            .content-box { padding: 1.5rem; }
+            
+            .sidebar { padding: 1.5rem 1rem; }
+            .sidebar .logo { margin-bottom: 2rem; }
+            .logo-line-1 { font-size: 1.1rem; }
+            .logo-lala { font-size: 2rem; }
+            .sidebar nav a { padding: 0.75rem; }
+
+            .toolbar { flex-direction: column; align-items: stretch; gap: 0.75rem; }
+            .ruled-paper { padding: 2.5rem 1rem 2rem 2.5rem; min-height: 800px; line-height: 26px; background-image: repeating-linear-gradient(to bottom, transparent, transparent 25px, var(--line-color) 25px, var(--line-color) 26px); }
+            .margin-line { left: 1.25rem; top: 1.5rem; bottom: 1.5rem; }
+            .editable-area { font-size: 14px; }
+            .editable-area p { margin-bottom: 26px; }
+
+            .data-table { border: 0; }
+            .data-table thead { border: none; clip: rect(0 0 0 0); height: 1px; margin: -1px; overflow: hidden; padding: 0; position: absolute; width: 1px; }
+            .data-table tr { border: 1px solid #ddd; display: block; margin-bottom: 1rem; border-radius: 8px; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+            .data-table td { border-bottom: 1px solid #eee; display: block; text-align: right; font-size: 0.85rem; padding-left: 50%; position: relative; }
+            .data-table td:last-child { border-bottom: 0; }
+            .data-table td::before {
+                content: attr(data-label);
+                display: block;
+                font-weight: 600;
+                color: var(--primary-color);
+                position: absolute;
+                left: 1rem;
+                width: calc(50% - 2rem);
+                text-align: left;
+                white-space: normal;
+            }
+            
+            .links-page-wrapper { flex-direction: column; gap: 2rem; }
+            .links-photo-container { flex-basis: auto; width: 100%; max-width: 350px; margin: 0 auto; order: -1; }
+            .links-container { gap: 1rem; }
+            .link-card { flex-direction: column; text-align: center; padding: 1.5rem; gap: 1rem; }
+            .link-card-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+            .link-card-text strong { font-size: 1.1rem; }
+            .link-card-text span { font-size: 0.85rem; }
         }
     </style>
 </head>
@@ -169,6 +214,7 @@
         </aside>
         
         <main class="main-content">
+            <!-- O restante do seu HTML (páginas, tabelas, etc.) permanece o mesmo -->
             <div id="redacao-page" class="page-content active">
                  <div class="main-container">
                     <div class="toolbar">
@@ -211,39 +257,39 @@
                     <table class="data-table">
                         <thead><tr><th>Órgão</th><th>Sigla</th><th>Jurisdição</th><th>Função detalhada</th></tr></thead>
                         <tbody>
-                            <tr><td>Ministério da Saúde</td><td>MS</td><td>Federal (Presidente)</td><td>Coordena o SUS; formula políticas de saúde; combate doenças; distribui vacinas e insumos; gerencia emergências sanitárias; regula a vigilância sanitária.</td></tr>
-                            <tr><td>Ministério da Educação</td><td>MEC</td><td>Federal (Presidente)</td><td>Define diretrizes da educação nacional; gerencia o ENEM, ProUni, FIES; regula instituições; supervisiona o Fundeb e a BNCC.</td></tr>
-                            <tr><td>Ministério da Justiça e Segurança Pública</td><td>MJSP</td><td>Federal (Presidente)</td><td>Combate o crime e a corrupção; coordena a PF e PRF; regula segurança pública; atua com direitos constitucionais e imigração.</td></tr>
-                            <tr><td>Ministério da Mulher, da Família e dos Direitos Humanos</td><td>MMFDH</td><td>Federal (Presidente)</td><td>Formula políticas para mulheres, idosos, crianças, LGBTQIAPN+; combate violência e preconceito; gerencia canais como o Disque 100.</td></tr>
-                            <tr><td>Ministério do Meio Ambiente</td><td>MMA</td><td>Federal (Presidente)</td><td>Protege biomas; combate desmatamento e queimadas; regula áreas de conservação; promove educação ambiental e políticas climáticas.</td></tr>
-                            <tr><td>Congresso Nacional</td><td>—</td><td>Federal (Poder Legislativo autônomo)</td><td>Cria leis; fiscaliza o Executivo; aprova orçamento; representa população e estados; instaura CPIs.</td></tr>
-                            <tr><td>Supremo Tribunal Federal</td><td>STF</td><td>Federal (Poder Judiciário autônomo)</td><td>Garante cumprimento da Constituição; julga ações constitucionais e conflitos federativos.</td></tr>
-                            <tr><td>Defensoria Pública da União</td><td>DPU</td><td>Federal (autônomo)</td><td>Oferece assistência jurídica gratuita a quem não pode pagar; atua em causas federais e coletivas.</td></tr>
-                            <tr><td>IBGE</td><td>—</td><td>Federal (Presidência da República)</td><td>Produz estatísticas e censos; fornece dados para políticas públicas; analisa dados sociais, geográficos e econômicos.</td></tr>
-                            <tr><td>Fundação Nacional dos Povos Indígenas</td><td>FUNAI</td><td>Federal (Presidente)</td><td>Protege os direitos indígenas; demarca terras; combate invasões; promove educação bilíngue e saúde indígena.</td></tr>
+                            <tr><td data-label="Órgão">Ministério da Saúde</td><td data-label="Sigla">MS</td><td data-label="Jurisdição">Federal (Presidente)</td><td data-label="Função">Coordena o SUS; formula políticas de saúde; combate doenças; distribui vacinas e insumos; gerencia emergências sanitárias; regula a vigilância sanitária.</td></tr>
+                            <tr><td data-label="Órgão">Ministério da Educação</td><td data-label="Sigla">MEC</td><td data-label="Jurisdição">Federal (Presidente)</td><td data-label="Função">Define diretrizes da educação nacional; gerencia o ENEM, ProUni, FIES; regula instituições; supervisiona o Fundeb e a BNCC.</td></tr>
+                            <tr><td data-label="Órgão">Ministério da Justiça e Segurança Pública</td><td data-label="Sigla">MJSP</td><td data-label="Jurisdição">Federal (Presidente)</td><td data-label="Função">Combate o crime e a corrupção; coordena a PF e PRF; regula segurança pública; atua com direitos constitucionais e imigração.</td></tr>
+                            <tr><td data-label="Órgão">Ministério da Mulher, da Família e dos Direitos Humanos</td><td data-label="Sigla">MMFDH</td><td data-label="Jurisdição">Federal (Presidente)</td><td data-label="Função">Formula políticas para mulheres, idosos, crianças, LGBTQIAPN+; combate violência e preconceito; gerencia canais como o Disque 100.</td></tr>
+                            <tr><td data-label="Órgão">Ministério do Meio Ambiente</td><td data-label="Sigla">MMA</td><td data-label="Jurisdição">Federal (Presidente)</td><td data-label="Função">Protege biomas; combate desmatamento e queimadas; regula áreas de conservação; promove educação ambiental e políticas climáticas.</td></tr>
+                            <tr><td data-label="Órgão">Congresso Nacional</td><td data-label="Sigla">—</td><td data-label="Jurisdição">Federal (Poder Legislativo autônomo)</td><td data-label="Função">Cria leis; fiscaliza o Executivo; aprova orçamento; representa população e estados; instaura CPIs.</td></tr>
+                            <tr><td data-label="Órgão">Supremo Tribunal Federal</td><td data-label="Sigla">STF</td><td data-label="Jurisdição">Federal (Poder Judiciário autônomo)</td><td data-label="Função">Garante cumprimento da Constituição; julga ações constitucionais e conflitos federativos.</td></tr>
+                            <tr><td data-label="Órgão">Defensoria Pública da União</td><td data-label="Sigla">DPU</td><td data-label="Jurisdição">Federal (autônomo)</td><td data-label="Função">Oferece assistência jurídica gratuita a quem não pode pagar; atua em causas federais e coletivas.</td></tr>
+                            <tr><td data-label="Órgão">IBGE</td><td data-label="Sigla">—</td><td data-label="Jurisdição">Federal (Presidência da República)</td><td data-label="Função">Produz estatísticas e censos; fornece dados para políticas públicas; analisa dados sociais, geográficos e econômicos.</td></tr>
+                            <tr><td data-label="Órgão">Fundação Nacional dos Povos Indígenas</td><td data-label="Sigla">FUNAI</td><td data-label="Jurisdição">Federal (Presidente)</td><td data-label="Função">Protege os direitos indígenas; demarca terras; combate invasões; promove educação bilíngue e saúde indígena.</td></tr>
                         </tbody>
                     </table>
                     <h2>GOVERNO ESTADUAL</h2>
                     <table class="data-table">
                          <thead><tr><th>Órgão</th><th>Sigla</th><th>Jurisdição</th><th>Função detalhada</th></tr></thead>
                         <tbody>
-                            <tr><td>Secretaria Estadual de Saúde</td><td>SES</td><td>Estadual (Governador)</td><td>Administra hospitais estaduais; combate epidemias; organiza campanhas de vacinação e prevenção; repassa verbas aos municípios.</td></tr>
-                            <tr><td>Secretaria Estadual de Educação</td><td>SEE</td><td>Estadual (Governador)</td><td>Administra escolas estaduais; promove capacitação docente; define currículos; amplia ensino técnico.</td></tr>
-                            <tr><td>Polícia Militar</td><td>PM</td><td>Estadual (Governador)</td><td>Realiza policiamento ostensivo; atua na prevenção de crimes; mantém a ordem pública.</td></tr>
-                            <tr><td>Polícia Civil</td><td>PC</td><td>Estadual (Governador)</td><td>Investiga crimes; conduz inquéritos; realiza perícias; trabalha com a Polícia Científica.</td></tr>
-                            <tr><td>Ministério Público Estadual</td><td>MPE</td><td>Estadual (autônomo)</td><td>Fiscaliza o cumprimento das leis; atua em defesa do consumidor, meio ambiente, infância; pode processar agentes públicos.</td></tr>
-                            <tr><td>Defensoria Pública Estadual</td><td>DPE</td><td>Estadual (autônomo)</td><td>Oferece defesa jurídica gratuita em ações estaduais; atua em casos de saúde, família, moradia e violência doméstica.</td></tr>
+                            <tr><td data-label="Órgão">Secretaria Estadual de Saúde</td><td data-label="Sigla">SES</td><td data-label="Jurisdição">Estadual (Governador)</td><td data-label="Função">Administra hospitais estaduais; combate epidemias; organiza campanhas de vacinação e prevenção; repassa verbas aos municípios.</td></tr>
+                            <tr><td data-label="Órgão">Secretaria Estadual de Educação</td><td data-label="Sigla">SEE</td><td data-label="Jurisdição">Estadual (Governador)</td><td data-label="Função">Administra escolas estaduais; promove capacitação docente; define currículos; amplia ensino técnico.</td></tr>
+                            <tr><td data-label="Órgão">Polícia Militar</td><td data-label="Sigla">PM</td><td data-label="Jurisdição">Estadual (Governador)</td><td data-label="Função">Realiza policiamento ostensivo; atua na prevenção de crimes; mantém a ordem pública.</td></tr>
+                            <tr><td data-label="Órgão">Polícia Civil</td><td data-label="Sigla">PC</td><td data-label="Jurisdição">Estadual (Governador)</td><td data-label="Função">Investiga crimes; conduz inquéritos; realiza perícias; trabalha com a Polícia Científica.</td></tr>
+                            <tr><td data-label="Órgão">Ministério Público Estadual</td><td data-label="Sigla">MPE</td><td data-label="Jurisdição">Estadual (autônomo)</td><td data-label="Função">Fiscaliza o cumprimento das leis; atua em defesa do consumidor, meio ambiente, infância; pode processar agentes públicos.</td></tr>
+                            <tr><td data-label="Órgão">Defensoria Pública Estadual</td><td data-label="Sigla">DPE</td><td data-label="Jurisdição">Estadual (autônomo)</td><td data-label="Função">Oferece defesa jurídica gratuita em ações estaduais; atua em casos de saúde, família, moradia e violência doméstica.</td></tr>
                         </tbody>
                     </table>
                     <h2>GOVERNO MUNICIPAL</h2>
                     <table class="data-table">
                         <thead><tr><th>Órgão</th><th>Sigla</th><th>Jurisdição</th><th>Função detalhada</th></tr></thead>
                         <tbody>
-                            <tr><td>Prefeitura</td><td>—</td><td>Municipal (Prefeito)</td><td>Executa políticas locais de saúde, educação, mobilidade e urbanismo; administra infraestrutura, coleta de lixo, transporte.</td></tr>
-                            <tr><td>Secretaria Municipal de Educação</td><td>SME</td><td>Municipal (Prefeito)</td><td>Gerencia creches e escolas de ensino infantil e fundamental; promove alfabetização e inclusão educacional.</td></tr>
-                            <tr><td>Secretaria Municipal de Saúde</td><td>SMS</td><td>Municipal (Prefeito)</td><td>Coordena postos de saúde (UBS); realiza vacinação; atua na saúde da família e prevenção de doenças.</td></tr>
-                            <tr><td>Câmara de Vereadores</td><td>—</td><td>Municipal (Poder Legislativo autônomo)</td><td>Cria leis municipais; fiscaliza o prefeito; discute orçamento e políticas públicas locais.</td></tr>
-                            <tr><td>Conselho Tutelar</td><td>—</td><td>Municipal (autônomo)</td><td>Garante os direitos das crianças e adolescentes; atua em casos de negligência, abuso, evasão escolar; articula com saúde e justiça.</td></tr>
+                            <tr><td data-label="Órgão">Prefeitura</td><td data-label="Sigla">—</td><td data-label="Jurisdição">Municipal (Prefeito)</td><td data-label="Função">Executa políticas locais de saúde, educação, mobilidade e urbanismo; administra infraestrutura, coleta de lixo, transporte.</td></tr>
+                            <tr><td data-label="Órgão">Secretaria Municipal de Educação</td><td data-label="Sigla">SME</td><td data-label="Jurisdição">Municipal (Prefeito)</td><td data-label="Função">Gerencia creches e escolas de ensino infantil e fundamental; promove alfabetização e inclusão educacional.</td></tr>
+                            <tr><td data-label="Órgão">Secretaria Municipal de Saúde</td><td data-label="Sigla">SMS</td><td data-label="Jurisdição">Municipal (Prefeito)</td><td data-label="Função">Coordena postos de saúde (UBS); realiza vacinação; atua na saúde da família e prevenção de doenças.</td></tr>
+                            <tr><td data-label="Órgão">Câmara de Vereadores</td><td data-label="Sigla">—</td><td data-label="Jurisdição">Municipal (Poder Legislativo autônomo)</td><td data-label="Função">Cria leis municipais; fiscaliza o prefeito; discute orçamento e políticas públicas locais.</td></tr>
+                            <tr><td data-label="Órgão">Conselho Tutelar</td><td data-label="Sigla">—</td><td data-label="Jurisdição">Municipal (autônomo)</td><td data-label="Função">Garante os direitos das crianças e adolescentes; atua em casos de negligência, abuso, evasão escolar; articula com saúde e justiça.</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -325,7 +371,11 @@
             Matter.Events.on(engine, 'afterUpdate', updateBallElements);
 
             function createThemeBall(text) {
-                const radius = Math.max(50, Math.min(85, text.length * 1.1 + 25));
+                const isMobile = window.innerWidth <= 768;
+                const radius = isMobile
+                    ? Math.max(40, Math.min(70, text.length * 0.9 + 20))
+                    : Math.max(50, Math.min(85, text.length * 1.1 + 25));
+
                 const x = worldContainer.clientWidth / 2 + (Math.random() - 0.5) * 100;
                 const y = -30 - (Math.random() * 50);
                 const ballBody = Bodies.circle(x, y, radius, { restitution: 0.5, friction: 0.1, render: { visible: false } });
@@ -340,18 +390,43 @@
                 if (shortText.length > 10) shortText = shortText.substring(0, 8) + '...';
                 ballElement.textContent = shortText;
                 worldContainer.appendChild(ballElement);
+                
+                // *** INÍCIO DA CORREÇÃO: Lógica para clique e toque ***
                 let startX, startY, startTime;
-                ballElement.addEventListener('mousedown', (e) => { startX = e.clientX; startY = e.clientY; startTime = Date.now(); });
-                ballElement.addEventListener('mouseup', (e) => {
-                    const distance = Math.sqrt(Math.pow(e.clientX - startX, 2) + Math.pow(e.clientY - startY, 2));
+
+                const handleInteractionEnd = (endX, endY) => {
+                    const distance = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2));
                     const duration = Date.now() - startTime;
-                    if (distance < 10 && duration < 200) {
+                    if (distance < 10 && duration < 200) { // Um clique/tap rápido
                         modalThemeText.textContent = text;
                         themeModal.style.display = 'flex';
                         setTimeout(() => themeModal.classList.add('visible'), 10);
                         Runner.stop(runner);
                     }
+                };
+
+                // Eventos para Mouse (Desktop)
+                ballElement.addEventListener('mousedown', (e) => {
+                    startX = e.clientX;
+                    startY = e.clientY;
+                    startTime = Date.now();
                 });
+                ballElement.addEventListener('mouseup', (e) => {
+                    handleInteractionEnd(e.clientX, e.clientY);
+                });
+
+                // Eventos para Toque (Mobile/Tablet)
+                ballElement.addEventListener('touchstart', (e) => {
+                    e.preventDefault(); // Previne o scroll da página enquanto toca na bola
+                    startX = e.changedTouches[0].clientX;
+                    startY = e.changedTouches[0].clientY;
+                    startTime = Date.now();
+                });
+                ballElement.addEventListener('touchend', (e) => {
+                    handleInteractionEnd(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+                });
+                // *** FIM DA CORREÇÃO ***
+
                 return ballBody;
             }
 
